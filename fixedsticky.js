@@ -33,6 +33,11 @@
         win.document.documentElement[ method ] :
         win.document.body[ method ];
     },
+    requestUpdate: function( el ) {
+      requestAnimationFrame(function() {
+        S.update( el );
+      });
+    },
     update: function( el ) {
       // Only exec if native sticky isn’t supported, fixed is supported,
       // and if fixed-fixed is also included on the page and is supported
@@ -102,12 +107,12 @@
       var $el = $( el );
 
       $( win ).bind( 'scroll', function() {
-        S.update( el );
+        S.requestUpdate( el );
       }).trigger( 'scroll' );
 
       $( win ).bind( 'resize', function() {
         if( $el.is( '.' + S.classes.active ) ) {
-          S.update( el );
+          S.requestUpdate( el );
         }
       });
     }
