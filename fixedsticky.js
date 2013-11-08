@@ -33,21 +33,17 @@
         win.document.documentElement[ method ] :
         win.document.body[ method ];
     },
+    hasFixSticky: function() {
+      // Check  native sticky, check fixed and if fixed-fixed is also included on the page and is supported
+      return !!( S.tests.sticky || !S.tests.fixed || win.FixedFixed && !$( win.document.documentElement ).hasClass( 'fixed-supported' ) );
+    },
     requestUpdate: function( el ) {
       requestAnimationFrame(function() {
         S.update( el );
       });
     },
     update: function( el ) {
-      // Only exec if native sticky isn’t supported, fixed is supported,
-      // and if fixed-fixed is also included on the page and is supported
-      if( S.tests.sticky || !S.tests.fixed || win.FixedFixed && !$( win.document.documentElement ).hasClass( 'fixed-supported' ) ) {
-        return;
-      }
-
-      if( !el.offsetWidth ) {
-        return;
-      }
+      if( !el.offsetWidth ) return;
 
       var $el = $( el ),
         keys = {
@@ -105,6 +101,7 @@
     },
     destroy: function( el ) {
       var $el = $( el );
+      if (S.hasFixSticky()) return;
 
       $( win ).unbind( '.fixedsticky' );
 
@@ -118,9 +115,10 @@
     init: function( el ) {
       var $el = $( el );
 
+      if (S.hasFixSticky()) return;
+
       return $el.each(function() {
         var _this = this;
-
         $( win ).bind( 'scroll.fixedsticky', function() {
           S.requestUpdate( _this);
         }).trigger( 'scroll.fixedsticky' );
@@ -134,19 +132,17 @@
     }
   };
 
-
   // Plugin
   $.fn.fixedsticky = function( method ) {
-    if ( S[ method ] ) {
+    if ( typeof S[ method ] === 'function') {
       return S[ method ].call( S, this);
     } else if ( typeof method === 'object' || ! method ) {
       return S.init.call( S, this );
     } else {
-      throw new Error( 'Method ' +  method + ' does not exist on jQuery.fixedsticky' );
+      throw new Error( 'Method `' +  method + '` does not exist on jQuery.fixedsticky' );
       return this;
     }
   };
-
 
   // Add fallback when fixed-fixed is not available.
   if( !win.FixedFixed ) {
