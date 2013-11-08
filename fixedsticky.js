@@ -103,30 +103,50 @@
         }
       }
     },
+    destroy: function( el ) {
+      var $el = $( el );
+
+      $( win ).unbind( '.fixedsticky' );
+
+      return $el.each(function() {
+        $( this )
+          .removeData()
+          .removeClass( S.classes.active )
+          .next().remove();
+      });
+    },
     init: function( el ) {
       var $el = $( el );
 
-      $( win ).bind( 'scroll', function() {
-        S.requestUpdate( el );
-      }).trigger( 'scroll' );
+      return $el.each(function() {
+        var _this = this;
 
-      $( win ).bind( 'resize', function() {
-        if( $el.is( '.' + S.classes.active ) ) {
-          S.requestUpdate( el );
-        }
+        $( win ).bind( 'scroll.fixedsticky', function() {
+          S.requestUpdate( _this);
+        }).trigger( 'scroll.fixedsticky' );
+
+        $( win ).bind( 'resize.fixedsticky', function() {
+          if( $el.is( '.' + S.classes.active ) ) {
+            S.requestUpdate( _this );
+          }
+        });
       });
     }
   };
 
-  // Expose Global
-  win.FixedSticky = S;
 
   // Plugin
-  $.fn.fixedsticky = function(){
-    return this.each(function () {
-      S.init( this );
-    });
+  $.fn.fixedsticky = function( method ) {
+    if ( S[ method ] ) {
+      return S[ method ].call( S, this);
+    } else if ( typeof method === 'object' || ! method ) {
+      return S.init.call( S, this );
+    } else {
+      throw new Error( 'Method ' +  method + ' does not exist on jQuery.fixedsticky' );
+      return this;
+    }
   };
+
 
   // Add fallback when fixed-fixed is not available.
   if( !win.FixedFixed ) {
